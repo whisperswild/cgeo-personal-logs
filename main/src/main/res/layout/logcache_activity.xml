@@ -144,6 +144,58 @@
                 android:layout_height="match_parent" />
 
             <LinearLayout
+                android:id="@+id/cgeo_personal_log_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp">
+
+                <!-- Personal Log Text Box -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/textinput_edittext"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="5000">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/cgeo_personal_log"
+                        style="@style/textinput_embedded"
+                        android:hint="@string/cgeo_personal_log"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLength="5000"
+                        android:minLines="5"
+                        tools:text="This is a private personal note just for you."
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="end">
+
+                    <Button
+                        android:id="@+id/cgeo_personal_log_attach_picture"
+                        style="@style/button_full"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/cgeo_personal_log_attach_picture" />
+
+                    <Button
+                        android:id="@+id/cgeo_personal_log_save"
+                        style="@style/button_full"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/cgeo_personal_log_save" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/inventory_box"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

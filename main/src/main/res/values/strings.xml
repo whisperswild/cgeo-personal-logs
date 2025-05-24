@@ -3126,5 +3126,8 @@
     <string name="emoji_category_activity">Activity</string>
     <string name="emoji_category_people">People</string>
     <string name="emoji_category_numbers">Numbers</string>
+    <string name="cgeo_personal_log">Personal Log</string>
+    <string name="cgeo_personal_log_attach_picture">Attach Picture</string>
+    <string name="cgeo_personal_log_save">Save Personal Log</string>
 
 </resources>
