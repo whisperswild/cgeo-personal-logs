@@ -156,11 +156,13 @@
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/textinput_edittext"
                     app:counterEnabled="true"
-                    app:counterMaxLength="5000">
+                    app:counterMaxLength="5000"
+                    app:placeholderText="@string/cgeo_personal_log_placeholder" >
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/cgeo_personal_log"
                         style="@style/textinput_embedded"
                         android:hint="@string/cgeo_personal_log"
+
                         android:inputType="textMultiLine|textCapSentences"
                         android:maxLength="5000"
                         android:minLines="5"

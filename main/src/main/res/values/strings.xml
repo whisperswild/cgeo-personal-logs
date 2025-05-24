@@ -3129,5 +3129,6 @@
     <string name="cgeo_personal_log">Personal Log</string>
     <string name="cgeo_personal_log_attach_picture">Attach Picture</string>
     <string name="cgeo_personal_log_save">Save Personal Log</string>
+    <string name="cgeo_personal_log_placeholder">This is a personal log and is stored locally. This log will not be uploaded to any caching sites.</string>
 
 </resources>
