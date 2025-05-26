@@ -7,6 +7,7 @@ import cgeo.geocaching.ui.ImageParam;
 import cgeo.geocaching.ui.TextParam;
 import cgeo.geocaching.ui.dialog.SimpleDialog;
 import cgeo.geocaching.utils.LocalizationUtils;
+import cgeo.geocaching.wherigo.openwig.formats.CartridgeFile;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,8 +18,6 @@ import android.view.View;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import cz.matejcik.openwig.formats.CartridgeFile;
 
 public class WherigoCartridgeDialogProvider implements IWherigoDialogProvider {
 
@@ -91,8 +90,10 @@ public class WherigoCartridgeDialogProvider implements IWherigoDialogProvider {
     }
 
     private void refreshGui(final WherigoCartridgeDetailsBinding binding) {
+        final String link = WherigoUtils.getWherigoDetailsUrl(cartridgeInfo.getCGuid());
         TextParam.text("**CGUID:** " + cartridgeInfo.getCGuid() + "  \n" +
             "**" + LocalizationUtils.getString(R.string.wherigo_author) + ":** " + cartridgeFile.author + "  \n" +
+            "**[" + LocalizationUtils.getString(R.string.cache_menu_browser) + "](" + link + ")**  \n" +
             "**" + LocalizationUtils.getString(R.string.cache_location) + ":** " + cartridgeInfo.getCartridgeLocation() + "  \n" +
             "**" + LocalizationUtils.getString(R.string.distance) + ":** " + WherigoUtils.getDisplayableDistance(WherigoLocationProvider.get().getLocation(), cartridgeInfo.getCartridgeLocation())
             ).setMarkdown(true).applyTo(binding.headerInformation);

@@ -20,9 +20,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -35,6 +35,9 @@ import com.google.mlkit.nl.translate.TranslateRemoteModel;
 import com.google.mlkit.nl.translate.Translation;
 import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.TextNode;
 
 public class OfflineTranslateUtils {
 
@@ -45,6 +48,7 @@ public class OfflineTranslateUtils {
     public static final String LANGUAGE_UNKNOWN = "und";
     public static final String LANGUAGE_UNDELETABLE = "en";
     public static final String LANGUAGE_INVALID = "";
+    public static final String LANGUAGE_AUTOMATIC = "default";
 
     public static List<Language> getSupportedLanguages() {
         final List<Language> languages = new ArrayList<>();
@@ -79,8 +83,9 @@ public class OfflineTranslateUtils {
             if (!availableLanguages.contains(lngCode)) {
                 missingLanguages.add(new Language(lngCode));
             }
-            if (!availableLanguages.contains(Settings.getTranslationTargetLanguage().getCode())) {
-                missingLanguages.add(Settings.getTranslationTargetLanguage());
+            final Language targetLanguage = Settings.getTranslationTargetLanguage();
+            if (!availableLanguages.contains(targetLanguage.getCode())) {
+                missingLanguages.add(targetLanguage);
             }
             consumer.accept(missingLanguages);
         });
@@ -93,8 +98,10 @@ public class OfflineTranslateUtils {
                 .addOnFailureListener(e -> errorConsumer.accept(e.getMessage()));
     }
 
-    public static void translateTextAutoDetectLng(final Activity activity, final String text, final Consumer<Language> unsupportedLngConsumer, final Consumer<List<Language>> downloadingModelConsumer, final Consumer<Translator> translatorConsumer) {
-        detectLanguage(text, lng -> getTranslator(activity, lng, unsupportedLngConsumer, downloadingModelConsumer, translatorConsumer), e -> {
+    public static void translateTextAutoDetectLng(final Activity activity, final Status translationStatus, final String text, final Consumer<Language> unsupportedLngConsumer, final Consumer<List<Language>> downloadingModelConsumer, final Consumer<Translator> translatorConsumer) {
+        detectLanguage(text, lng -> {
+            getTranslator(activity, translationStatus, lng, unsupportedLngConsumer, downloadingModelConsumer, translatorConsumer);
+        }, e -> {
 
         });
     }
@@ -107,41 +114,51 @@ public class OfflineTranslateUtils {
      * @param downloadingModelConsumer  returned if language models need to be downloaded, should be used to show a progress UI to the user
      * @param translatorConsumer        returns the translator object
      */
-    public static void getTranslator(final Activity activity, final Language sourceLng, final Consumer<Language> unsupportedLngConsumer, final Consumer<List<OfflineTranslateUtils. Language>> downloadingModelConsumer, final Consumer<Translator> translatorConsumer) {
-        final String lng = TranslateLanguage.fromLanguageTag(sourceLng.getCode());
-        if (null == lng) {
+    public static void getTranslator(final Activity activity, final Status translationStatus, final Language sourceLng, final Consumer<Language> unsupportedLngConsumer, final Consumer<List<OfflineTranslateUtils.Language>> downloadingModelConsumer, final Consumer<Translator> translatorConsumer) {
+        if (!isLanguageSupported(sourceLng)) {
             unsupportedLngConsumer.accept(sourceLng);
             return;
         }
 
-        findMissingLanguageModels(lng, missingLanguageModels -> {
+        final String sourceLngCode = TranslateLanguage.fromLanguageTag(sourceLng.getCode());
+        findMissingLanguageModels(sourceLngCode, missingLanguageModels -> {
             if (missingLanguageModels.isEmpty()) {
-                OfflineTranslateUtils.getTranslator(lng, translatorConsumer);
+                OfflineTranslateUtils.getTranslator(sourceLngCode, translatorConsumer);
             } else {
                 SimpleDialog.of(activity).setTitle(R.string.translator_model_download_confirm_title).setMessage(TextParam.id(R.string.translator_model_download_confirm_txt, String.join(", ", missingLanguageModels.stream().map(OfflineTranslateUtils.Language::toString).collect(Collectors.toList())))).confirm(() -> {
                     downloadingModelConsumer.accept(missingLanguageModels);
-                    OfflineTranslateUtils.getTranslator(lng, translatorConsumer);
-                });
+                    OfflineTranslateUtils.getTranslator(sourceLngCode, translatorConsumer);
+                        },
+                        () -> translationStatus.abortTranslation()
+                );
             }
         });
     }
 
     public static void translateParagraph(final Translator translator, final OfflineTranslateUtils.Status status, final String text, final Consumer<String> consumer, final Consumer<Exception> errorConsumer) {
-        final List<String> origText = Arrays.asList(text.split("\n"));
-        final List<String> translatedText = new ArrayList<>();
-        for (String p : origText) {
-            translator.translate(p)
-                    .addOnSuccessListener(translation -> {
-                        translatedText.add(translation);
-                        if (origText.size() == translatedText.size()) {
-                            consumer.accept(String.join("\n", translatedText));
-                            status.updateProgress();
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        status.abortTranslation();
-                        errorConsumer.accept(e);
-                    });
+        final Document document = Jsoup.parseBodyFragment(text);
+        final List<TextNode> elements = document.children().select("*").textNodes();
+        final AtomicInteger remaining = new AtomicInteger(elements.size());
+        if (remaining.get() == 0) {
+            consumer.accept("");
+            status.updateProgress();
+        } else {
+            for (TextNode textNode : elements) {
+                translator.translate(textNode.text())
+                        .addOnSuccessListener(translation -> {
+                            textNode.text(translation);
+                            // check if all done
+                            if (remaining.decrementAndGet() == 0) {
+                                consumer.accept(document.body().html());
+                                status.updateProgress();
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("err: " + e.getMessage());
+                            status.abortTranslation();
+                            errorConsumer.accept(e);
+                        });
+            }
         }
     }
 
@@ -203,8 +220,8 @@ public class OfflineTranslateUtils {
     }
 
     public static void initializeListingTranslatorInTabbedViewPagerActivity(final TabbedViewPagerActivity cda, final LinearLayout translationBox, final String translateText, final Runnable callback) {
-        if (!Settings.getTranslationTargetLanguage().isValid()) {
-            translationBox.setVisibility(View.GONE);
+        if (!OfflineTranslateUtils.isTargetLanguageValid()) {
+            AndroidRxUtils.runOnUi(() -> translationBox.setVisibility(View.GONE));
             return;
         }
         final TextView note = translationBox.findViewById(R.id.description_translate_note);
@@ -212,28 +229,51 @@ public class OfflineTranslateUtils {
 
         // add observer to listing language
         cda.translationStatus.setSourceLanguageChangeConsumer(lng -> {
+            final boolean showTranslationBox;
             if (null == lng || Settings.getLanguagesToNotTranslate().contains(lng.getCode())) {
-                translationBox.setVisibility(View.GONE);
-            } else if (OfflineTranslateUtils.LANGUAGE_UNKNOWN.equals(lng.getCode())) {
-                button.setEnabled(false);
-                note.setText(R.string.translator_language_unknown);
+                showTranslationBox = false;
             } else {
-                button.setEnabled(true);
-                note.setText(cda.getResources().getString(R.string.translator_language_detected, lng.toString()));
+                showTranslationBox = true;
+                if (OfflineTranslateUtils.LANGUAGE_UNKNOWN.equals(lng.getCode())) {
+                    button.setEnabled(false);
+                    note.setText(R.string.translator_language_unknown);
+                } else {
+                    button.setEnabled(true);
+                    note.setText(cda.getResources().getString(R.string.translator_language_detected, lng.toString()));
+                }
             }
+            AndroidRxUtils.runOnUi(() -> translationBox.setVisibility(showTranslationBox ? View.VISIBLE : View.GONE));
         });
 
         button.setOnClickListener(v -> callback.run());
         note.setOnClickListener(v -> OfflineTranslateUtils.showLanguageSelection(cda, cda.translationStatus::setSourceLanguage));
-        translationBox.setVisibility(View.VISIBLE);
 
         // identify listing language
         OfflineTranslateUtils.detectLanguage(translateText,
                 cda.translationStatus::setSourceLanguage,
                 error -> {
+                    AndroidRxUtils.runOnUi(() -> translationBox.setVisibility(View.VISIBLE));
                     button.setEnabled(false);
                     note.setText(error);
                 });
+    }
+
+    public static OfflineTranslateUtils.Language getAppLanguageOrDefault() {
+        final OfflineTranslateUtils.Language appLanguage = Settings.getApplicationLanguage();
+        if (OfflineTranslateUtils.isLanguageSupported(appLanguage)) {
+            return appLanguage;
+        } else {
+            return new OfflineTranslateUtils.Language(OfflineTranslateUtils.LANGUAGE_UNDELETABLE);
+        }
+    }
+
+    public static boolean isTargetLanguageValid() {
+        return Settings.getTranslationTargetLanguage().isValid();
+    }
+
+    public static boolean isLanguageSupported(final Language language) {
+        final String languageCode = TranslateLanguage.fromLanguageTag(language.getCode());
+        return (null != languageCode);
     }
 
     public static class TranslationProgressHandler extends ProgressButtonDisposableHandler {
@@ -259,6 +299,10 @@ public class OfflineTranslateUtils {
 
         public String getDisplayName() {
             return new Locale(code).getDisplayName();
+        }
+
+        public String getDisplayName(final Locale locale) {
+            return new Locale(code).getDisplayName(locale);
         }
 
         @NonNull

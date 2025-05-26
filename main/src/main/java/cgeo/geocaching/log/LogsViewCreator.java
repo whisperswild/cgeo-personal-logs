@@ -8,7 +8,6 @@ import cgeo.geocaching.databinding.LogsPageBinding;
 import cgeo.geocaching.enumerations.LoadFlags;
 import cgeo.geocaching.models.Geocache;
 import cgeo.geocaching.network.SmileyImage;
-import cgeo.geocaching.settings.Settings;
 import cgeo.geocaching.storage.DataStore;
 import cgeo.geocaching.ui.AnchorAwareLinkMovementMethod;
 import cgeo.geocaching.ui.DecryptTextClickListener;
@@ -197,7 +196,7 @@ public abstract class LogsViewCreator extends TabbedViewPagerFragment<LogsPageBi
                             TranslationUtils.startActivityTranslate(activity, Locale.ENGLISH.getLanguage(), HtmlUtils.extractText(log.log)));
                 }
             }
-            if (Settings.getTranslationTargetLanguage().isValid()) {
+            if (OfflineTranslateUtils.isTargetLanguageValid()) {
                 ctxMenu.addItem(R.string.translator_tooltip, R.drawable.ic_menu_translate, it -> {
                     if (translationStatus.isTranslated()) {
                         translationStatus.setNotTranslated();
@@ -205,7 +204,7 @@ public abstract class LogsViewCreator extends TabbedViewPagerFragment<LogsPageBi
                     } else {
                         final String logText = HtmlUtils.extractText(log.log);
                         translationStatus.startTranslation(1, null, null);
-                        OfflineTranslateUtils.translateTextAutoDetectLng(getActivity(), logText,
+                        OfflineTranslateUtils.translateTextAutoDetectLng(getActivity(), translationStatus, logText,
                                 unsupportedLng -> Toast.makeText(getContext(), getString(R.string.translator_language_unsupported, unsupportedLng), Toast.LENGTH_LONG).show(),
                                 downloadingModel -> Toast.makeText(getContext(), R.string.translator_model_download_notification, Toast.LENGTH_SHORT).show(),
                                 translator -> OfflineTranslateUtils.translateParagraph(translator, translationStatus, logText, holder.binding.log::setText, e -> Toast.makeText(getContext(), getString(R.string.translator_translation_error, e.getMessage()), Toast.LENGTH_LONG).show()));

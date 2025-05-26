@@ -274,7 +274,7 @@ public class Settings {
     }
 
     public static int getExpectedVersion() {
-        return 9;
+        return 10;
     }
 
     private static void migrateSettings() {
@@ -478,6 +478,19 @@ public class Settings {
 
             e.apply();
             setActualVersion(9);
+        }
+
+        if (currentVersion < 10) {
+            final Editor e = sharedPrefs.edit();
+
+            final String dateFormatString = getShortDateFormat();
+            if (!dateFormatString.isEmpty()) {
+                // fix short date formatting: "week date" => "date", see #16925
+                e.putString(getKey(R.string.pref_short_date_format), dateFormatString.replace("Y", "y"));
+            }
+
+            e.apply();
+            setActualVersion(10);
         }
     }
 
@@ -2564,16 +2577,30 @@ public class Settings {
         return getString(R.string.pref_short_date_format, "");
     }
 
-    public static OfflineTranslateUtils.Language getTranslationTargetLanguage() {
-        final String lngCode = getString(R.string.pref_translation_language, getApplicationLocale().getLanguage());
+    public static OfflineTranslateUtils.Language getTranslationTargetLanguageRaw() {
+        final String lngCode = getString(R.string.pref_translation_language, null);
+        if (lngCode == null) {
+            return new OfflineTranslateUtils.Language(OfflineTranslateUtils.LANGUAGE_AUTOMATIC);
+        }
         if (!lngCode.isEmpty()) {
-            final OfflineTranslateUtils.Language lng = new OfflineTranslateUtils.Language(lngCode);
-            if (OfflineTranslateUtils.getSupportedLanguages().contains(lng)) {
-                return lng;
-            }
+            return new OfflineTranslateUtils.Language(lngCode);
         }
         return new OfflineTranslateUtils.Language(OfflineTranslateUtils.LANGUAGE_INVALID);
     }
+
+    public static OfflineTranslateUtils.Language getApplicationLanguage() {
+        return new OfflineTranslateUtils.Language(Settings.getApplicationLocale().getLanguage());
+    }
+
+    public static OfflineTranslateUtils.Language getTranslationTargetLanguage() {
+        final OfflineTranslateUtils.Language rawLanguage = getTranslationTargetLanguageRaw();
+        if (StringUtils.equals(rawLanguage.getCode(), OfflineTranslateUtils.LANGUAGE_AUTOMATIC)) {
+            return OfflineTranslateUtils.getAppLanguageOrDefault();
+        }
+
+        return rawLanguage;
+    }
+
 
     public static @NonNull Set<String> getLanguagesToNotTranslate() {
         final Set<String> lngs = new HashSet<>();

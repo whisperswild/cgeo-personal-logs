@@ -22,6 +22,9 @@ import cgeo.geocaching.utils.LocalizationUtils;
 import cgeo.geocaching.utils.Log;
 import cgeo.geocaching.utils.TextUtils;
 import cgeo.geocaching.utils.html.HtmlUtils;
+import cgeo.geocaching.wherigo.openwig.Engine;
+import cgeo.geocaching.wherigo.openwig.EventTable;
+import cgeo.geocaching.wherigo.openwig.Zone;
 import static cgeo.geocaching.wherigo.WherigoUtils.getDisplayableDistance;
 import static cgeo.geocaching.wherigo.WherigoUtils.getDrawableForImageData;
 
@@ -48,9 +51,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import cz.matejcik.openwig.Engine;
-import cz.matejcik.openwig.EventTable;
-import cz.matejcik.openwig.Zone;
 import org.apache.commons.lang3.StringUtils;
 
 public final class WherigoViewUtils {
@@ -218,13 +218,14 @@ public final class WherigoViewUtils {
 
     public static void showErrorDialog(final Activity activity) {
         final String lastError = WherigoGame.get().getLastError();
+        final String lastErrorCartridgeLink = WherigoUtils.getWherigoDetailsUrl(WherigoGame.get().getLastErrorCGuid());
         final String dialogErrorMessage = (lastError == null ? LocalizationUtils.getString(R.string.wherigo_error_game_noerror) :
-                LocalizationUtils.getString(R.string.wherigo_error_game_error, lastError));
+                LocalizationUtils.getString(R.string.wherigo_error_game_error, lastError, lastErrorCartridgeLink));
 
         final SimpleDialog dialog = SimpleDialog.of(activity)
                 .setTitle(TextParam.id(R.string.wherigo_error_title))
                 .setMessage(TextParam.text(dialogErrorMessage).setMarkdown(true))
-                .setPositiveButton(TextParam.id(R.string.copy));
+                .setPositiveButton(lastError == null ? TextParam.id(R.string.ok) : TextParam.id(R.string.copy));
 
         if (lastError != null) {
             dialog
@@ -232,8 +233,10 @@ public final class WherigoViewUtils {
                 .setNeutralAction(() -> WherigoGame.get().clearLastError());
         }
         dialog.show(() -> {
-            ClipboardUtils.copyToClipboard(lastError);
-            ActivityMixin.showToast(activity, R.string.copied_to_clipboard);
+            if (lastError != null) {
+                ClipboardUtils.copyToClipboard(lastError);
+                ActivityMixin.showToast(activity, R.string.copied_to_clipboard);
+            }
         });
         WherigoGame.get().clearLastErrorNotSeen();
     }

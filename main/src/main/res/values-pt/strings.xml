@@ -1925,11 +1925,9 @@
     <string name="helper_gcwizard_description">O Assistente de GC contém inúmeras ferramentas para cálculos criptográficos, geodésicos e científicos simples, bem como centenas de conjuntos de vários símbolos.</string>
     <!-- export -->
     <string name="share_export">Partilhar / Exportar</string>
-    <string name="export">Exportar</string>
     <string name="export_progress">Exportar: %1$s</string>
     <string name="export_exportedto">exportado para</string>
     <string name="export_failed">A exportação falhou</string>
-    <string name="export_fieldnotes">Notas de campo</string>
     <string name="export_fieldnotes_info">As notas de campo serão exportadas para \'/sdcard/field-notes\', com a data e a hora actual como nome de ficheiro.</string>
     <string name="export_fieldnotes_upload">Enviar para geocaching.com</string>
     <string name="export_fieldnotes_uploading">A enviar…</string>
@@ -1939,7 +1937,6 @@
     <string name="export_gpx_info">O ficheiro GPX vai ser exportado para %1$s com a data e a hora actual como nome de ficheiro.</string>
     <string name="export_confirm_title">A exportar %1$s</string>
     <string name="export_confirm_message">Para: %1$s\nNome de ficheiro: %2$s</string>
-    <string name="export_persnotes">Notas pessoais</string>
     <string name="export_persnotes_uploading">A enviar nota pessoal %1$d</string>
     <plurals name="export_persnotes_upload_success">
         <item quantity="one">%1$d nota enviada com sucesso</item>
@@ -2622,7 +2619,6 @@
     <string name="wherigo_download_progress_download_status">Transferido %1$s / %2$s (%3$s %%)</string>
     <string name="wherigo_error_title">Relatório de problemas Wherigo</string>
     <string name="wherigo_error_game_noerror">Nenhum erro indicado pelo motor do Wherigo.</string>
-    <string name="wherigo_error_game_error">Erro reportado pelo motor Wherigo:\n\n```\n%1$s\n```</string>
     <string name="wherigo_error_email">Relatório de problema no Wherigo\n\nErro: %1$s\n\nInformação Wherigo: %2$s</string>
     <string name="wherigo_error_toast">O motor do Wherigo reportou um erro. Abra o diálogo de erros para ver os detalhes.</string>
     <string name="wherigo_confirm_stop_running_game_title">Parar de executar o Jogo Wherigo</string>

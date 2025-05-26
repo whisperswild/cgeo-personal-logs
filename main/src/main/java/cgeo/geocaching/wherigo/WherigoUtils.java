@@ -20,6 +20,16 @@ import cgeo.geocaching.utils.CommonUtils;
 import cgeo.geocaching.utils.LocalizationUtils;
 import cgeo.geocaching.utils.Log;
 import cgeo.geocaching.utils.TextUtils;
+import cgeo.geocaching.wherigo.kahlua.vm.LuaTable;
+import cgeo.geocaching.wherigo.openwig.Action;
+import cgeo.geocaching.wherigo.openwig.Container;
+import cgeo.geocaching.wherigo.openwig.Engine;
+import cgeo.geocaching.wherigo.openwig.EventTable;
+import cgeo.geocaching.wherigo.openwig.Media;
+import cgeo.geocaching.wherigo.openwig.Thing;
+import cgeo.geocaching.wherigo.openwig.Zone;
+import cgeo.geocaching.wherigo.openwig.ZonePoint;
+import cgeo.geocaching.wherigo.openwig.formats.CartridgeFile;
 
 import android.app.Activity;
 import android.content.Context;
@@ -51,18 +61,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import cz.matejcik.openwig.Action;
-import cz.matejcik.openwig.Container;
-import cz.matejcik.openwig.Engine;
-import cz.matejcik.openwig.EventTable;
-import cz.matejcik.openwig.Media;
-import cz.matejcik.openwig.Thing;
-import cz.matejcik.openwig.Zone;
-import cz.matejcik.openwig.ZonePoint;
-import cz.matejcik.openwig.formats.CartridgeFile;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import se.krka.kahlua.vm.LuaTable;
 
 public final class WherigoUtils {
 
@@ -71,7 +71,8 @@ public final class WherigoUtils {
     public static final TextParam TP_CANCEL_BUTTON = TextParam.id(R.string.cancel).setAllCaps(true).setImage(ImageParam.id(R.drawable.ic_menu_cancel));
 
     private static final Pattern PATTERN_CARTRIDGE_LINK = Pattern.compile("https?" + Pattern.quote("://") + "(?:www\\.)?" + Pattern.quote("wherigo.com/cartridge/") + "(?:details|download)" + Pattern.quote(".aspx?") + "[Cc][Gg][Uu][Ii][Dd]=([-0-9a-zA-Z]*)");
-    private static final String WHERIGO_URL_BASE = "https://www.wherigo.com/cartridge/download.aspx?CGUID=";
+    private static final String WHERIGO_DOWNLOAD_URL_BASE = "https://www.wherigo.com/cartridge/download.aspx?CGUID=";
+    private static final String WHERIGO_DETAILS_URL_BASE = "https://wherigo.com/cartridge/details.aspx?CGUID=";
 
     public static final GeopointConverter<ZonePoint> GP_CONVERTER = new GeopointConverter<>(
         gc -> new ZonePoint(gc.getLatitude(), gc.getLongitude(), 0),
@@ -363,8 +364,14 @@ public final class WherigoUtils {
     }
 
     @Nullable
-    public static String getWherigoUrl(@Nullable final String guid) {
-        return guid == null ? null : WHERIGO_URL_BASE + guid;
+    public static String getWherigoDetailsUrl(@Nullable final String guid) {
+        return guid == null ? null : WHERIGO_DETAILS_URL_BASE + guid;
+    }
+
+
+    @Nullable
+    public static String getWherigoDownloadUrl(@Nullable final String guid) {
+        return guid == null ? null : WHERIGO_DOWNLOAD_URL_BASE + guid;
     }
 
     @NonNull

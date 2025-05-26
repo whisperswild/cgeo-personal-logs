@@ -368,6 +368,7 @@
     <string name="translator_preference_nottranslate_lng">Ignored languages</string>
     <string name="translator_preference_nottranslate_lng_summary">Source languages to not offer translation for</string>
     <string name="translator_preference_disable">&lt;Disable translation&gt;</string>
+    <string name="translator_preference_application_language">&lt;Use application language&gt;</string>
     <string name="translator_model_download_select">Download offline translation language</string>
     <string name="translator_model_download_confirm_title">Confirm language download</string>
     <string name="translator_model_download_confirm_txt">Translation model for language %s needs to be downloaded. Model size is roughly 20-40 MB.</string>
@@ -380,6 +381,7 @@
     <string name="translator_language_unsupported">Language (%s) not supported for translation.</string>
     <string name="translator_language_unknown">Unable to identify language</string>
     <string name="translator_language_detected">Translate from "%s"</string>
+    <string name="translator_target_language">Translate to "%s"</string>
     <string name="translator_translation_error">Failed to translate text: %s</string>
     <string name="translator_translation_initerror">Failed to initialize translator</string>
     <string name="translator_translation_success">Translated from "%s", tap button to restore original</string>
@@ -1052,6 +1054,8 @@
     <string name="init_summary_address">Show address instead of coordinates on main screen</string>
     <string name="init_select_language">Select language</string>
     <string name="init_use_default_language">Use default language</string>
+    <string name="init_use_application_language">Use application language</string>
+    <string name="init_translation_disabled">Translation disabled</string>
     <string name="init_date_format">Date format</string>
     <string name="init_date_format_description">Format to use for short dates, e.g. in log view</string>
     <string name="system_default">System Default</string>
@@ -1603,6 +1607,7 @@
     <string name="cache_description">Description</string>
     <string name="cache_description_table_note">Description contains table formatting which may need to be viewed at %s to be seen correctly.</string>
     <string name="cache_description_rendering">Rendering description, please wait…</string>
+    <string name="cache_description_translating_and_rendering">Translating and rendering description, please wait…</string>
     <string name="cache_description_render_restricted_warning" tools:ignore="PluralsCandidate">Warning: Description is very large (%1$d chars). Only first %2$d%% are displayed.</string>
     <string name="cache_description_render_fully">Render complete description</string>
     <string name="cache_area_description">Area Description</string>
@@ -2197,11 +2202,11 @@
 
     <!-- export -->
     <string name="share_export">Share / Export</string>
-    <string name="export">Export</string>
+    <string name="export">Export / Upload</string>
     <string name="export_progress">Export: %1$s</string>
     <string name="export_exportedto">exported to</string>
     <string name="export_failed">Export failed</string>
-    <string name="export_fieldnotes">Field Notes</string>
+    <string name="export_fieldnotes">Export field notes</string>
     <string name="export_fieldnotes_info">Field Notes will be exported to /sdcard/field-notes with the current date and time as their file name.</string>
     <string name="export_fieldnotes_upload">Upload to geocaching.com</string>
     <string name="export_fieldnotes_uploading">Uploading…</string>
@@ -2211,7 +2216,7 @@
     <string name="export_gpx_info">The GPX file will be exported to %1$s with the current date and time as its file name.</string>
     <string name="export_confirm_title">Exporting %1$s</string>
     <string name="export_confirm_message">To Path: %1$s\nFile Name: %2$s</string>
-    <string name="export_persnotes">Personal notes</string>
+    <string name="export_persnotes">Upload personal notes</string>
     <string name="export_persnotes_uploading">Uploading personal note %1$d</string>
     <plurals name="export_persnotes_upload_success">
         <item quantity="zero">Uploaded %1$d notes successfully</item>
@@ -3009,7 +3014,7 @@
 
     <string name="wherigo_error_title">Wherigo Problem report</string>
     <string name="wherigo_error_game_noerror">No error reported by Wherigo Engine.</string>
-    <string name="wherigo_error_game_error">Error reported by Wherigo Engine:\n\n```\n%1$s\n```</string>
+    <string name="wherigo_error_game_error">Error reported by Wherigo Engine:\n\n```\n%1$s\n```\nYou may contact the author of the cartridge [here](%2$s)</string>
     <string name="wherigo_error_email">Wherigo Problem report\n\nEngine Error: %1$s\n\nWherigo Info: %2$s</string>
     <string name="wherigo_error_toast">Wherigo Engine reported an error. Open bug dialog for details.</string>
 

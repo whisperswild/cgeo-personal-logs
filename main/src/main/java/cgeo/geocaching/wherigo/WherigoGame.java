@@ -20,6 +20,19 @@ import cgeo.geocaching.utils.Log;
 import cgeo.geocaching.utils.TextUtils;
 import cgeo.geocaching.utils.Version;
 import cgeo.geocaching.utils.html.HtmlUtils;
+import cgeo.geocaching.wherigo.kahlua.vm.LuaClosure;
+import cgeo.geocaching.wherigo.openwig.Cartridge;
+import cgeo.geocaching.wherigo.openwig.Engine;
+import cgeo.geocaching.wherigo.openwig.EventTable;
+import cgeo.geocaching.wherigo.openwig.Media;
+import cgeo.geocaching.wherigo.openwig.Player;
+import cgeo.geocaching.wherigo.openwig.Task;
+import cgeo.geocaching.wherigo.openwig.Thing;
+import cgeo.geocaching.wherigo.openwig.WherigoLib;
+import cgeo.geocaching.wherigo.openwig.Zone;
+import cgeo.geocaching.wherigo.openwig.ZonePoint;
+import cgeo.geocaching.wherigo.openwig.formats.CartridgeFile;
+import cgeo.geocaching.wherigo.openwig.platform.UI;
 
 import android.app.Activity;
 import android.net.Uri;
@@ -37,19 +50,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import cz.matejcik.openwig.Cartridge;
-import cz.matejcik.openwig.Engine;
-import cz.matejcik.openwig.EventTable;
-import cz.matejcik.openwig.Media;
-import cz.matejcik.openwig.Player;
-import cz.matejcik.openwig.Task;
-import cz.matejcik.openwig.Thing;
-import cz.matejcik.openwig.Zone;
-import cz.matejcik.openwig.ZonePoint;
-import cz.matejcik.openwig.formats.CartridgeFile;
-import cz.matejcik.openwig.platform.UI;
 import org.apache.commons.lang3.StringUtils;
-import se.krka.kahlua.vm.LuaClosure;
 
 public class WherigoGame implements UI {
 
@@ -77,6 +78,7 @@ public class WherigoGame implements UI {
     private File cartridgeCacheDir;
     private HtmlImage htmlImageGetter;
     private String lastError;
+    private String lastErrorCGuid;
     private boolean lastErrorNotSeen = false;
     private String contextGeocode;
     private String contextGeocacheName;
@@ -102,8 +104,8 @@ public class WherigoGame implements UI {
         try {
             final String name = String.format("c:geo %s", Version.getVersionName(CgeoApplication.getInstance()));
             final String platform = String.format("Android %s", android.os.Build.VERSION.RELEASE + "/" + Build.DISPLAY);
-            cz.matejcik.openwig.WherigoLib.env.put(cz.matejcik.openwig.WherigoLib.DEVICE_ID, name);
-            cz.matejcik.openwig.WherigoLib.env.put(cz.matejcik.openwig.WherigoLib.PLATFORM, platform);
+            WherigoLib.env.put(WherigoLib.DEVICE_ID, name);
+            WherigoLib.env.put(WherigoLib.PLATFORM, platform);
         } catch (Exception e) {
             // not really important
             Log.d(LOG_PRAEFIX + "unable to set name/platform for OpenWIG", e);
@@ -149,6 +151,7 @@ public class WherigoGame implements UI {
             this.cartridgeInfo = new WherigoCartridgeInfo(cartridgeFileInfo, true, false);
             setCGuidAndDependentThings(this.cartridgeInfo.getCGuid());
             this.lastError = null;
+            this.lastErrorCGuid = null;
             this.lastErrorNotSeen = false;
 
             //try to restore context geocache
@@ -216,8 +219,14 @@ public class WherigoGame implements UI {
         return lastError;
     }
 
+    @Nullable
+    public String getLastErrorCGuid() {
+        return lastErrorCGuid;
+    }
+
     public void clearLastError() {
         lastError = null;
+        lastErrorCGuid = null;
         notifyListeners(NotifyType.REFRESH);
     }
 
@@ -364,6 +373,7 @@ public class WherigoGame implements UI {
             this.lastError = errorMessage +
                 " (Cartridge: " + getCartridgeName() + ", cguid: " + getCGuid() +
                 ", timestamp: " + Formatter.formatDateTime(System.currentTimeMillis()) + ")";
+            this.lastErrorCGuid = getCGuid();
             this.lastErrorNotSeen = true;
         }
         ViewUtils.showToast(null, R.string.wherigo_error_toast);
